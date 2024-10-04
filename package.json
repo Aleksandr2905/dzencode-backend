@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app",
-    "start:dev": "nodemon app"
+    "start": "node ./app.js",
+    "start:dev": "nodemon ./app.js"
   },
   "keywords": [],
   "author": "",
