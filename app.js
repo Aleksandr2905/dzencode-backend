@@ -1,50 +1,68 @@
+// import { Server } from "socket.io";
+// import { createServer } from "http";
+
+// const httpServer = createServer();
+
+// const wsServer = new Server(httpServer, {
+//   cors: {
+//     origin: "*",
+//   },
+// });
+
+// let activeUsers = 0;
+
+// wsServer.on("connection", (socket) => {
+//   activeUsers++;
+//   console.log(`User connected. Active users: ${activeUsers}`);
+
+//   wsServer.emit("activeUsers", activeUsers);
+
+//   socket.on("disconnect", () => {
+//     activeUsers--;
+//     console.log(`User disconnected. Active users: ${activeUsers}`);
+//     wsServer.emit("activeUsers", activeUsers);
+//   });
+// });
+
+// httpServer.listen(process.env.PORT || 3000);
+
+import { createServer } from "node:http";
+import next from "next";
 import { Server } from "socket.io";
-import { createServer } from "http";
 
-const httpServer = createServer();
+// const dev = process.env.NODE_ENV !== "production";
+const hostname = "localhost";
+const port = 3000;
+// when using middleware `hostname` and `port` must be provided below
+const app = next({ hostname, port });
+const handler = app.getRequestHandler();
 
-const wsServer = new Server(httpServer, {
-  cors: {
-    origin: "*",
-  },
-});
+app.prepare().then(() => {
+  const httpServer = createServer(handler);
 
-let activeUsers = 0;
+  const io = new Server(httpServer);
 
-wsServer.on("connection", (socket) => {
-  activeUsers++;
-  console.log(`User connected. Active users: ${activeUsers}`);
+  let activeUsers = 0;
 
-  wsServer.emit("activeUsers", activeUsers);
+  wsServer.on("connection", (socket) => {
+    activeUsers++;
+    console.log(`User connected. Active users: ${activeUsers}`);
 
-  socket.on("disconnect", () => {
-    activeUsers--;
-    console.log(`User disconnected. Active users: ${activeUsers}`);
-    wsServer.emit("activeUsers", activeUsers);
+    io.emit("activeUsers", activeUsers);
+
+    socket.on("disconnect", () => {
+      activeUsers--;
+      console.log(`User disconnected. Active users: ${activeUsers}`);
+      io.emit("activeUsers", activeUsers);
+    });
+
+    httpServer
+      .once("error", (err) => {
+        console.error(err);
+        process.exit(1);
+      })
+      .listen(port, () => {
+        console.log(`> Ready on http://${hostname}:${port}`);
+      });
   });
 });
-
-httpServer.listen(process.env.PORT || 3000);
-
-// import { Server } from "socket.io";
-
-// const SocketHandler = (req, res) => {
-//   if (res.socket.server.io) {
-//     console.log("Socket is already running");
-//   } else {
-//     console.log("Socket is initializing");
-//     const io = new Server(res.socket.server);
-//     res.socket.server.io = io;
-
-//     io.on("connection", (socket) => {
-//       io.emit("activeUsers", io.engine.clientsCount);
-
-//       socket.on("disconnect", () => {
-//         io.emit("activeUsers", io.engine.clientsCount);
-//       });
-//     });
-//   }
-//   res.end();
-// };
-
-// export default SocketHandler;
