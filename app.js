@@ -24,7 +24,7 @@ wsServer.on("connection", (socket) => {
   });
 });
 
-httpServer.listen(3000);
+httpServer.listen(process.env.PORT || 3000);
 
 // import { Server } from "socket.io";
 
