@@ -24,7 +24,7 @@ wsServer.on("connection", (socket) => {
   });
 });
 
-httpServer.listen(4000);
+httpServer.listen(3000);
 
 // import { Server } from "socket.io";
 
