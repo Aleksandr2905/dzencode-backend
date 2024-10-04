@@ -26,35 +26,25 @@
 
 // httpServer.listen(4000);
 
-import { createServer } from "node:http";
-import next from "next";
 import { Server } from "socket.io";
 
-const dev = process.env.NODE_ENV !== "production";
-const hostname = "localhost";
-const port = 3000;
-const app = next({ dev, hostname, port });
-const handler = app.getRequestHandler();
+const SocketHandler = (req, res) => {
+  if (res.socket.server.io) {
+    console.log("Socket is already running");
+  } else {
+    console.log("Socket is initializing");
+    const io = new Server(res.socket.server);
+    res.socket.server.io = io;
 
-app.prepare().then(() => {
-  const httpServer = createServer(handler);
-
-  const io = new Server(httpServer);
-
-  io.on("connection", (socket) => {
-    io.emit("activeUsers", io.engine.clientsCount);
-
-    socket.on("disconnect", () => {
+    io.on("connection", (socket) => {
       io.emit("activeUsers", io.engine.clientsCount);
-    });
 
-    httpServer
-      .once("error", (err) => {
-        console.error(err);
-        process.exit(1);
-      })
-      .listen(port, () => {
-        console.log(`> Ready on http://${hostname}:${port}`);
+      socket.on("disconnect", () => {
+        io.emit("activeUsers", io.engine.clientsCount);
       });
-  });
-});
+    });
+  }
+  res.end();
+};
+
+export default SocketHandler;
