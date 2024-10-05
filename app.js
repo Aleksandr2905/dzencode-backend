@@ -1,10 +1,10 @@
-// import express from "express";
+import express from "express";
 import { Server } from "socket.io";
 import { createServer } from "http";
 import "dotenv/config";
 
-// const app = express();
-const httpServer = createServer();
+const app = express();
+const httpServer = createServer(app);
 
 const io = new Server(httpServer, {
   cors: {
@@ -20,7 +20,7 @@ io.on("connection", (socket) => {
   });
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 httpServer.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
